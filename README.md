@@ -28,6 +28,7 @@ Here is an example of the table create the 20/10/2022 at 12h (showed in the VM w
 ![3](https://user-images.githubusercontent.com/74610219/196955492-002c10f3-b02a-46c4-895d-7c9d70b59861.png)
 
 Or here via MySQL Workbench:
+
 ![3_1](https://user-images.githubusercontent.com/74610219/196983851-23b9d343-82dc-42d3-865a-daf4f1e6c5f6.png)
 
 ## 4. Automate this process with a cron job

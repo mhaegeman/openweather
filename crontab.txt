@@ -1,0 +1,1 @@
+0 0,6,12,18 * * * /home/maximehaegeman/miniconda3/bin/python datacollection.py >> logs.txt

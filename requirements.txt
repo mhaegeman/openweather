@@ -1,0 +1,6 @@
+pandas
+mysql
+pymysql
+sqlalchemy
+requests
+datetime

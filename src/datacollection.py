@@ -8,7 +8,7 @@ current_time = current_full_time.strftime("%Y_%m_%d_%H")
 
 engine = sqlalchemy.create_engine('mysql+pymysql://maxime:1234@34.175.135.239/OpenWeather')
 
-API_key = "e41b65e923f4c25e7555a9adccf0edb5"
+API_key = "ENTER_YOUR_API_KEY"
 base_url = "http://api.openweathermap.org/data/2.5/weather?"
 
 df=pd.DataFrame({'cities':["Dongen", "Tilburg", "Eindhoven"],

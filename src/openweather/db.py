@@ -13,10 +13,19 @@ def get_engine(db_url: str) -> sqlalchemy.Engine:
 
 
 def init_schema(engine: sqlalchemy.Engine, schema: str = "OpenWeather") -> None:
-    """Create the target schema if it does not already exist."""
-    with engine.connect() as conn:
-        conn.execute(text(f"CREATE SCHEMA IF NOT EXISTS `{schema}`"))
-        conn.commit()
+    """Create the target schema if it does not already exist.
+
+    Connects at the server level (no database selected) so this works even
+    before the schema exists — which is exactly the first-time setup case.
+    """
+    server_url = engine.url.set(database=None)
+    server_engine = sqlalchemy.create_engine(server_url)
+    try:
+        with server_engine.connect() as conn:
+            conn.execute(text(f"CREATE SCHEMA IF NOT EXISTS `{schema}`"))
+            conn.commit()
+    finally:
+        server_engine.dispose()
     logger.info("Schema '%s' ready.", schema)
 
 

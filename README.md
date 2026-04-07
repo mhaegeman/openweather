@@ -4,7 +4,42 @@
 ![Python](https://img.shields.io/badge/python-3.11%2B-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
-Automated weather data pipeline — fetches temperature, humidity, and pressure for configurable cities via the [OpenWeather API](https://openweathermap.org/api) and persists hourly snapshots to MySQL.
+Automated weather data pipeline — fetches live atmospheric data for configurable cities via the [OpenWeather API](https://openweathermap.org/api) and persists hourly snapshots to MySQL.
+
+---
+
+## What data does it collect?
+
+For each city, the pipeline records three atmospheric measurements every 6 hours:
+
+| Field | Unit | Description |
+|---|---|---|
+| `temperature` | Kelvin (K) | Ambient air temperature — 288 K ≈ 15 °C |
+| `humidity` | % | Relative humidity |
+| `pressure` | hPa | Atmospheric pressure at sea level |
+
+Each run saves a snapshot table named `OpenWeather_YYYY_MM_DD_HH`, giving you a timestamped record of conditions across all tracked cities.
+
+---
+
+## Output
+
+**Queried via Python:**
+
+![Terminal output showing weather data for Dongen, Tilburg and Eindhoven](img/3.png)
+
+**Queried via MySQL Workbench:**
+
+![MySQL Workbench showing the OpenWeather snapshot table](img/3_1.png)
+
+---
+
+## Use cases
+
+- **Trend analysis** — compare temperature and humidity across cities over time
+- **Data engineering practice** — end-to-end pipeline: API → transform → SQL
+- **Alerting baseline** — feed the snapshots into a dashboard or anomaly detector
+- **Extend to more cities** — just add city names to the `CITIES` env var
 
 ---
 
@@ -12,14 +47,12 @@ Automated weather data pipeline — fetches temperature, humidity, and pressure 
 
 ```
 OpenWeather API
-      │
+      │  (REST, every 6h via cron)
       ▼
- collector.py   ──→   db.py   ──→   MySQL (Google Cloud SQL)
+ collector.py  ──→  db.py  ──→  MySQL (Google Cloud SQL)
       │
-  config.py (env vars)
+  config.py (env vars: API key, DB URL, city list)
 ```
-
-Data is collected 4× per day via cron and stored in timestamped tables (`OpenWeather_YYYY_MM_DD_HH`).
 
 ---
 
@@ -38,6 +71,12 @@ cp .env.example .env
 # Edit .env — set DB_URL, OPENWEATHER_API_KEY, and optionally CITIES
 ```
 
+| Variable | Example | Description |
+|---|---|---|
+| `DB_URL` | `mysql+pymysql://user:pass@host/OpenWeather` | SQLAlchemy connection string |
+| `OPENWEATHER_API_KEY` | `abc123...` | Free key from [openweathermap.org](https://openweathermap.org/api) |
+| `CITIES` | `Dongen,Tilburg,Eindhoven` | Comma-separated list of cities |
+
 ### 3. Initialise the database schema
 
 ```python
@@ -50,20 +89,18 @@ init_schema(get_engine(DB_URL))
 ### 4. Run a collection
 
 ```bash
-PYTHONPATH=src python -m openweather.collector
+python -m openweather.collector
 ```
 
 ---
 
 ## Automation (cron)
 
-Install the provided schedule to collect data 4× per day:
+Install the provided schedule to collect data 4× per day (midnight, 6h, 12h, 18h):
 
 ```bash
 crontab crontab.txt
 ```
-
-Schedule: `0 0,6,12,18 * * *`
 
 ---
 
@@ -72,14 +109,14 @@ Schedule: `0 0,6,12,18 * * *`
 ```
 openweather/
 ├── src/openweather/
-│   ├── config.py       # env-var configuration
-│   ├── db.py           # engine creation & persistence
-│   └── collector.py    # API fetching & entry point
+│   ├── config.py         # env-var configuration
+│   ├── db.py             # engine creation & persistence
+│   └── collector.py      # API fetching & entry point
 ├── tests/
 │   ├── test_collector.py
 │   └── test_db.py
 ├── .github/workflows/
-│   └── ci.yml          # lint + test on every push
+│   └── ci.yml            # lint + test on every push
 ├── .env.example
 ├── crontab.txt
 ├── requirements.txt

@@ -1,1 +1,1 @@
-0 0,6,12,18 * * * /home/maximehaegeman/miniconda3/bin/python datacollection.py >> logs.txt
+0 0,6,12,18 * * * cd /home/maximehaegeman/openweather && PYTHONPATH=src /home/maximehaegeman/miniconda3/bin/python -m openweather.collector >> logs.txt 2>&1
